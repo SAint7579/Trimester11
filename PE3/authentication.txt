@@ -1,0 +1,72 @@
+TOS and SOT :
+authenticator_sot = IAMAuthenticator('xIYhXtY6yerL5RaJtcIWeZsRUEhr2Lg4QtJl8ewdWdFJ')
+authenticator_tos = IAMAuthenticator('ETWDjIpMsu2zgqWYf7B7OmF5M6XfhDQVzK0OTnEPgVae')
+
+
+text_to_speech = TextToSpeechV1(
+    authenticator=authenticator_tos
+)
+text_to_speech.set_service_url('https://api.eu-gb.text-to-speech.watson.cloud.ibm.com/instances/d5ebf459-88c0-4286-9a6c-2ebc23f0537f')
+
+voice = text_to_speech.get_voice('en-US_AllisonV3Voice').get_result()
+print(json.dumps(voice, indent=2))
+with open('audio_file.wav', 'wb') as audio_file:
+    audio_file.write(
+        text_to_speech.synthesize(
+            'The quick brown fox jumped over the lazy dog',
+            voice='en-US_AllisonV3Voice',
+            accept='audio/wav'        
+        ).get_result().content)
+
+## From IBM's FLAC file
+speech_to_text = SpeechToTextV1(
+    authenticator=authenticator_sot
+)
+speech_to_text.set_service_url('https://api.eu-gb.speech-to-text.watson.cloud.ibm.com/instances/6fedbb60-6c90-4d7c-bcad-2d11f3e4b917')
+
+with open(os.path.join(os.path.dirname(os.path.abspath("__file__")), './.', 'audio-file.flac'),
+               'rb') as audio_file:
+    speech_recognition_results = speech_to_text.recognize(
+        audio=audio_file,
+        content_type='audio/flac',
+        word_alternatives_threshold=0.9,
+    ).get_result()
+print(json.dumps(speech_recognition_results, indent=2))
+
+
+
+
+NLU
+import json
+from ibm_watson import NaturalLanguageUnderstandingV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+
+# Categories Features
+
+from ibm_watson.natural_language_understanding_v1 import Features, CategoriesOptions
+
+authenticator = IAMAuthenticator('qkeY9fOxU9_ydnlm_meloySvMVi7DqNiTW8OdmCs9xP2')
+natural_language_understanding = NaturalLanguageUnderstandingV1(
+    version='2019-07-12',
+    authenticator=authenticator
+)
+
+natural_language_understanding.set_service_url('https://api.eu-gb.natural-language-understanding.watson.cloud.ibm.com/instances/bb51e465-056f-4157-a2e1-31ee75f9faef')
+
+response = natural_language_understanding.analyze(
+    url='https://towardsdatascience.com/chest-x-rays-pneumonia-detection-using-convolutional-neural-network-63d6ec2d1dee',
+    features=Features(categories=CategoriesOptions(limit=5))).get_result()
+
+print(json.dumps(response, indent=2))
+
+
+personality insight
+IAMAuthenticator('cf3bu8qmTB6oOtZ62Vf1GdOzgOh3XeCKsmxMepOHcVz0')
+
+Tone Analyzer
+authenticator = IAMAuthenticator('0w53ZeLXNDXySWlPrj4-gAKbJ5i0k53O-CdS4Jxun5Sf')
+tone_analyzer = ToneAnalyzerV3(
+    version='2017-09-21',
+    authenticator=authenticator
+)
+tone_analyzer.set_service_url('https://api.eu-gb.tone-analyzer.watson.cloud.ibm.com/instances/7929578f-79e4-4749-8b55-b8dced09fb4f')
